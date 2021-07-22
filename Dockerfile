@@ -2,6 +2,7 @@
 
 #Install the tools
 RUN apt-get update && DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" apt-get install -y
+RUN echo "APT::Get::Assume-Yes \"true\";" > /etc/apt/apt.conf.d/90assumeyes
 RUN apt-get update && apt-get install -y --no-install-recommends \
   ca-certificates \
   curl \
@@ -110,16 +111,20 @@ RUN CONDA=/usr/share/miniconda \
 # adding script file to configure the ADO-Agent
 
 RUN curl -LsS https://aka.ms/InstallAzureCLIDeb | bash \
-    && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/*
+
 ARG TARGETARCH=amd64
 ARG AGENT_VERSION=2.185.1
+
 WORKDIR /azp
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
-  AZP_AGENTPACKAGE_URL=https://vstsagentpackage.azureedge.net/agent/${AGENT_VERSION}/vsts-agent-linux-x64-${AGENT_VERSION}.tar.gz; \
-  else \
-  AZP_AGENTPACKAGE_URL=https://vstsagentpackage.azureedge.net/agent/${AGENT_VERSION}/vsts-agent-linux-${TARGETARCH}-${AGENT_VERSION}.tar.gz; \
-  fi; \
-  curl -LsS "$AZP_AGENTPACKAGE_URL" | tar -xz
+      AZP_AGENTPACKAGE_URL=https://vstsagentpackage.azureedge.net/agent/${AGENT_VERSION}/vsts-agent-linux-x64-${AGENT_VERSION}.tar.gz; \
+    else \
+      AZP_AGENTPACKAGE_URL=https://vstsagentpackage.azureedge.net/agent/${AGENT_VERSION}/vsts-agent-linux-${TARGETARCH}-${AGENT_VERSION}.tar.gz; \
+    fi; \
+    curl -LsS "$AZP_AGENTPACKAGE_URL" | tar -xz
+
 COPY ./start.sh .
 RUN chmod +x start.sh
+
 ENTRYPOINT [ "./start.sh" ]
