@@ -13,8 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libcurl4 \
   libunwind8 \
   netcat \
-  libssl1.0 \
-  libssl-dev \
+  libssl1.0-dev \
   libffi-dev \
   lsb-release \
   apt-transport-https \
@@ -98,3 +97,29 @@ RUN apt-get update \
   Write-Host "'Waiting for $env:PSModuleAnalysisCachePath'" ; \
   Start-Sleep -Seconds 6 ; \
   }"
+
+# Install Miniconda
+RUN curl -sL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o miniconda.sh \
+    && chmod +x miniconda.sh \
+    && ./miniconda.sh -b -p /usr/share/miniconda \
+    && rm miniconda.sh
+RUN CONDA=/usr/share/miniconda \
+    && echo "CONDA=$CONDA" | tee -a /etc/environment \
+    && ln -s $CONDA/bin/conda /usr/bin/conda
+
+# adding script file to configure the ADO-Agent
+
+RUN curl -LsS https://aka.ms/InstallAzureCLIDeb | bash \
+  && rm -rf /var/lib/apt/lists/*
+ARG TARGETARCH=amd64
+ARG AGENT_VERSION=2.185.1
+WORKDIR /azp
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+  AZP_AGENTPACKAGE_URL=https://vstsagentpackage.azureedge.net/agent/${AGENT_VERSION}/vsts-agent-linux-x64-${AGENT_VERSION}.tar.gz; \
+  else \
+  AZP_AGENTPACKAGE_URL=https://vstsagentpackage.azureedge.net/agent/${AGENT_VERSION}/vsts-agent-linux-${TARGETARCH}-${AGENT_VERSION}.tar.gz; \
+  fi; \
+  curl -LsS "$AZP_AGENTPACKAGE_URL" | tar -xz
+COPY ./start.sh .
+RUN chmod +x start.sh
+ENTRYPOINT [ "./start.sh" ]
