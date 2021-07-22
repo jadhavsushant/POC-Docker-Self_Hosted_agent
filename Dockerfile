@@ -110,7 +110,7 @@ RUN CONDA=/usr/share/miniconda \
 # adding script file to configure the ADO-Agent
 
 RUN curl -LsS https://aka.ms/InstallAzureCLIDeb | bash \
-  && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 ARG TARGETARCH=amd64
 ARG AGENT_VERSION=2.185.1
 WORKDIR /azp
