@@ -2,7 +2,7 @@
 
 #Install the tools
 RUN apt-get update && DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" apt-get install -y
-RUN echo "APT::Get::Assume-Yes \"true\";" > /etc/apt/apt.conf.d/90assumeyes
+# RUN echo "APT::Get::Assume-Yes \"true\";" > /etc/apt/apt.conf.d/90assumeyes
 RUN apt-get update && apt-get install -y --no-install-recommends \
   ca-certificates \
   curl \
