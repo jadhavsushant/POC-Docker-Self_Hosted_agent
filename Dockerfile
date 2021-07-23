@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   git \
   iputils-ping \
   libcurl4 \
+  libicu60 \
+  libssl1.0 \
   libunwind8 \
   netcat \
   libssl1.0-dev \
@@ -110,7 +112,7 @@ RUN CONDA=/usr/share/miniconda \
 
 # adding script file to configure the ADO-Agent
 
-RUN curl -LsS https://aka.ms/InstallAzureCLIDeb | bash \
+RUN wget https://aka.ms/InstallAzureCLIDeb | bash \
   && rm -rf /var/lib/apt/lists/*
 
 ARG TARGETARCH=amd64
@@ -127,4 +129,5 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
 COPY ./start.sh .
 RUN chmod +x start.sh
 
-ENTRYPOINT [ "./start.sh" ]
+# ENTRYPOINT [ "./start.sh"]
+ENTRYPOINT [ "./start.sh"]
